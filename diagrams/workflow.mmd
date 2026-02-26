@@ -1,0 +1,11 @@
+graph TD
+    A[Start: Request Received] --> B{Valid Request?}
+    B -->|Yes| C[Assign to Team]
+    B -->|No| D[Return to Requester]
+    C --> E[Process Request]
+    E --> F{Approved?}
+    F -->|Yes| G[Implement Changes]
+    F -->|No| H[Request Revisions]
+    H --> E
+    G --> I[Review & QA]
+    I --> J[Deploy / Complete]

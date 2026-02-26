@@ -1,0 +1,20 @@
+graph LR
+    subgraph User Layer
+        A[Web Browser]
+        B[Mobile App]
+    end
+    subgraph Application Layer
+        C[API Gateway]
+        D[Auth Service]
+        E[Core Service]
+    end
+    subgraph Data Layer
+        F[(Database)]
+        G[(File Storage)]
+    end
+    A --> C
+    B --> C
+    C --> D
+    C --> E
+    E --> F
+    E --> G
