@@ -16,7 +16,7 @@ import mermaid as md
 from mermaid.graph import Graph
 
 PROJECT_DIR = Path(__file__).parent
-DIAGRAMS_SRC = PROJECT_DIR / "diagrams"
+DIAGRAMS_SRC = PROJECT_DIR / "src" / "diagrams"
 DIAGRAMS_OUT = PROJECT_DIR / "build" / "diagrams"
 TEMPLATES_DIR = PROJECT_DIR / "templates"
 FILTERS_DIR = PROJECT_DIR / "filters"
@@ -227,7 +227,7 @@ def render_diagrams():
     mmd_files = sorted(DIAGRAMS_SRC.glob("*.mmd"))
 
     if not mmd_files:
-        print("  No .mmd files found in diagrams/")
+        print("  No .mmd files found in src/diagrams/")
         return []
 
     rendered = []

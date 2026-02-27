@@ -80,8 +80,8 @@ uv run build.py --clean && uv run build.py -f all
 .
 ├── src/                  # Markdown source documents
 │   ├── images/           # Screenshots and static images
+│   ├── diagrams/         # Mermaid diagram sources (.mmd)
 │   └── *.md              # Each file becomes a separate output document
-├── diagrams/             # Mermaid diagram sources (.mmd)
 ├── filters/
 │   └── toc.lua           # Lua filter for static table of contents
 ├── templates/
@@ -112,7 +112,7 @@ subtitle: "Optional Subtitle"
 | Cross-references | `[Label](#heading-anchor)` | Link by heading anchor, not by number |
 | Tables | Pipe tables | Standard Markdown table syntax |
 | Images | `![Alt](images/file.png)` | Place files in `src/images/` |
-| Mermaid diagrams | `![Alt](diagram-name.png)` | Source `.mmd` files in `diagrams/` |
+| Mermaid diagrams | `![Alt](diagram-name.png)` | Source `.mmd` files in `src/diagrams/` |
 | Code blocks | Triple backticks with optional language | Syntax highlighting in HTML and PDF |
 | Inline code | Single backticks | Use for file paths, commands, URLs |
 | Math (inline) | `$x^2$` | LaTeX notation |
@@ -137,7 +137,7 @@ Files are stored at `S:\budget\2026 Budget Files\Capital Expenditures`.
 ## How it works
 
 1. **Source validation** — checks for broken internal anchor links and bare Windows paths (which break LaTeX/PDF)
-2. **Diagram rendering** — all `.mmd` files in `diagrams/` are rendered to PNG via mermaid-py
+2. **Diagram rendering** — all `.mmd` files in `src/diagrams/` are rendered to PNG via mermaid-py
 3. **Document conversion** — pandoc converts each `.md` file in `src/` to the requested format(s)
 
 Format-specific behavior:
