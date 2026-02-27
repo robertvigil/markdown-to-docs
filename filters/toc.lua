@@ -64,7 +64,10 @@ function Pandoc(doc)
   for _, item in ipairs(toc_items) do
     table.insert(toc_block, item)
   end
-  table.insert(toc_block, pandoc.HorizontalRule())
+  -- Page break after TOC (format-aware)
+  table.insert(toc_block, pandoc.RawBlock("openxml", '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'))
+  table.insert(toc_block, pandoc.RawBlock("latex", "\\newpage"))
+  table.insert(toc_block, pandoc.RawBlock("html", '<div style="page-break-after: always;"></div>'))
 
   -- Insert TOC at the beginning (after any metadata title block)
   local new_blocks = {}

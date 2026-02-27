@@ -12,6 +12,7 @@ Convert Markdown documents to Word (.docx), PDF, and HTML with support for Merma
 - **Word templates** — custom styling via `reference.docx`
 - **Self-contained HTML** — images and KaTeX embedded, no external dependencies
 - **PDF engine flexibility** — supports xelatex, pdflatex, typst, and weasyprint
+- **Source validation** — checks for broken internal links and bare Windows paths before building
 - **Runtime tool detection** — checks what's installed and only offers available formats
 
 ## Quick start
@@ -135,14 +136,15 @@ Files are stored at `S:\budget\2026 Budget Files\Capital Expenditures`.
 
 ## How it works
 
-1. **Diagram rendering** — all `.mmd` files in `diagrams/` are rendered to PNG via mermaid-py
-2. **Document conversion** — pandoc converts each `.md` file in `src/` to the requested format(s)
+1. **Source validation** — checks for broken internal anchor links and bare Windows paths (which break LaTeX/PDF)
+2. **Diagram rendering** — all `.mmd` files in `diagrams/` are rendered to PNG via mermaid-py
+3. **Document conversion** — pandoc converts each `.md` file in `src/` to the requested format(s)
 
 Format-specific behavior:
 
 | | Word (.docx) | PDF | HTML |
 |---|---|---|---|
-| TOC | Static via Lua filter | Static via Lua filter | Pandoc built-in `--toc` |
+| TOC | Static via Lua filter (page break after) | Static via Lua filter (page break after) | Pandoc built-in `--toc` |
 | Math | Word OMML equations | Native LaTeX | KaTeX (embedded) |
 | Images | Embedded | Embedded | Base64 embedded |
 | Styling | `templates/reference.docx` | LaTeX defaults + DejaVu Sans Mono | Pandoc default + KaTeX CSS |
@@ -170,6 +172,7 @@ The file `templates/reference.docx` controls the appearance of Word output. To c
 | Styles don't match template | Make sure you edited styles in `templates/reference.docx`, not just text. |
 | pandoc not found | Install pandoc: `sudo apt install pandoc`. |
 | PDF build fails | Run `uv run build.py --check` to verify a PDF engine is installed. |
+| Bare Windows paths break PDF | Wrap all `\` paths in backticks — the build validates this and warns before building. |
 | Box-drawing chars missing in PDF | The build uses DejaVu Sans Mono for monospace — ensure the font is installed. |
 | Math not rendering in HTML | Requires an internet connection on first view if KaTeX CDN is used, or embedded KaTeX (current default). |
 

@@ -6,6 +6,7 @@
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -250,6 +251,77 @@ def render_diagrams():
 
 
 # ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
+
+def heading_to_anchor(text):
+    """Convert heading text to a pandoc-style anchor identifier."""
+    anchor = text.lower()
+    anchor = re.sub(r'[^\w\s-]', '', anchor)  # remove punctuation except hyphens
+    anchor = anchor.strip()
+    anchor = re.sub(r'[\s]+', '-', anchor)     # spaces to hyphens
+    return anchor
+
+
+def validate_links(md_files):
+    """Check that all internal anchor links point to valid headings."""
+    errors = []
+    for md_file in md_files:
+        content = md_file.read_text(encoding="utf-8")
+
+        # Collect anchors from headings (lines starting with #)
+        anchors = set()
+        for line in content.splitlines():
+            m = re.match(r'^(#{1,6})\s+(.+?)(?:\s*#*\s*)?$', line)
+            if m:
+                anchors.add(heading_to_anchor(m.group(2)))
+
+        # Find all internal links: [text](#anchor)
+        for m in re.finditer(r'\[([^\]]*)\]\(#([^)]+)\)', content):
+            link_text, target = m.group(1), m.group(2)
+            if target not in anchors:
+                # Find line number
+                pos = m.start()
+                line_num = content[:pos].count('\n') + 1
+                errors.append((md_file.name, line_num, target, link_text))
+
+    if errors:
+        print("\n  WARNING: broken internal links found:")
+        for fname, line_num, target, link_text in errors:
+            print(f"    {fname}:{line_num} — #{target} (\"{link_text}\")")
+        print()
+    return errors
+
+
+def validate_bare_paths(md_files):
+    """Check for Windows paths outside backticks/code blocks (breaks LaTeX)."""
+    errors = []
+    for md_file in md_files:
+        content = md_file.read_text(encoding="utf-8")
+        in_code_block = False
+        for line_num, line in enumerate(content.splitlines(), 1):
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                continue
+            if in_code_block:
+                continue
+            # Remove inline code spans before checking
+            stripped = re.sub(r'`[^`]+`', '', line)
+            for m in re.finditer(r'[A-Z]:\\[\w\\]', stripped):
+                # Extract the full path for the message
+                path_match = re.search(r'[A-Z]:\\[^\s,)]+', stripped[m.start():])
+                path_text = path_match.group(0) if path_match else m.group(0)
+                errors.append((md_file.name, line_num, path_text))
+
+    if errors:
+        print("\n  WARNING: bare Windows paths found (wrap in backticks):")
+        for fname, line_num, path in errors:
+            print(f"    {fname}:{line_num} — {path}")
+        print()
+    return errors
+
+
+# ---------------------------------------------------------------------------
 # Document building
 # ---------------------------------------------------------------------------
 
@@ -371,6 +443,11 @@ def main():
     print("=" * 60)
     print(f"Documentation Build [{format_label}]")
     print("=" * 60)
+
+    # Validate sources
+    print("\nValidating sources...")
+    validate_links(md_files)
+    validate_bare_paths(md_files)
 
     # Step 1: Diagrams
     total_steps = 1 + len(formats)
