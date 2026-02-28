@@ -85,7 +85,8 @@ uv run build.py --clean && uv run build.py -f all
 ├── filters/
 │   └── toc.lua           # Lua filter for static table of contents
 ├── templates/
-│   └── reference.docx    # Word style template
+│   ├── reference.docx    # Word style template
+│   └── style.css         # HTML style template
 ├── build/                # Output directory (generated)
 │   └── diagrams/         # Rendered diagram PNGs
 └── build.py              # Build script
@@ -147,10 +148,20 @@ Format-specific behavior:
 | TOC | Static via Lua filter (page break after) | Static via Lua filter (page break after) | Pandoc built-in `--toc` |
 | Math | Word OMML equations | Native LaTeX | KaTeX (embedded) |
 | Images | Embedded | Embedded | Base64 embedded |
-| Styling | `templates/reference.docx` | LaTeX defaults + DejaVu Sans Mono | Pandoc default + KaTeX CSS |
+| Fonts | `templates/reference.docx` styles | Liberation Sans + DejaVu Sans Mono | Liberation Sans + DejaVu Sans Mono via `templates/style.css` |
 | PDF engine | N/A | xelatex (default), pdflatex, typst, weasyprint | N/A |
 
-## Customizing the Word template
+## Customizing fonts and styling
+
+All three output formats use a sans-serif body font to match. The defaults are:
+
+| Format | Body font | Monospace font | How to change |
+|--------|-----------|----------------|---------------|
+| Word | Calibri (via `templates/reference.docx`) | Per template | Edit styles in the reference template |
+| PDF | Liberation Sans | DejaVu Sans Mono | Change `-V mainfont=` and `-V monofont=` in `build.py` |
+| HTML | Liberation Sans | DejaVu Sans Mono | Edit `templates/style.css` |
+
+### Word template
 
 The file `templates/reference.docx` controls the appearance of Word output. To customize it:
 
@@ -161,6 +172,19 @@ The file `templates/reference.docx` controls the appearance of Word output. To c
 5. Rebuild — the new styles are applied automatically.
 
 > **Tip:** Do not add content to the reference template. Pandoc only reads the styles from this file, not the text.
+
+### PDF fonts
+
+PDF fonts are set via pandoc variables in `build.py`. The font must be installed on the system. To change:
+
+```python
+"-V", "mainfont=Your Sans Font",    # body text
+"-V", "monofont=Your Mono Font",    # code blocks
+```
+
+### HTML fonts
+
+HTML styling is controlled by `templates/style.css`. Edit the `font-family` declarations to change fonts. The CSS is embedded in the output, so no external dependencies.
 
 ## Troubleshooting
 

@@ -358,12 +358,14 @@ def build_pandoc_cmd(md_file, fmt, pdf_engine=None):
             cmd.extend([
                 "-V", "geometry:margin=1in",
                 "-V", "colorlinks=true",
+                "-V", "mainfont=Liberation Sans",
                 "-V", "monofont=DejaVu Sans Mono",
             ])
 
     elif fmt == "html":
         cmd.extend(["--standalone", "--toc", "--toc-depth=3", "--embed-resources",
-                     "--katex=https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/"])
+                     "--katex=https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/",
+                     f"--css={TEMPLATES_DIR / 'style.css'}"])
 
     return cmd, out_file
 
